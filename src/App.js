@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 
 // Importar los estilos de Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
+// Importa Firebase
 
 function App() {
   return (
