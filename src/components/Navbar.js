@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   return (
-    <nav className="navbar navbar-expand-lg" data-bs-theme="light" style={{ borderTop: '1px solid #ccc', marginTop: '10px' }}>
+    <nav className="navbar navbar-expand-lg" data-bs-theme="light" style={{ borderTop: '1px solid #ccc', marginTop: '30px' }}>
       <div className="container-fluid">
         <Link className="navbar-brand" to="/">Inicio</Link>
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
