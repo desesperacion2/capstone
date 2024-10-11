@@ -4,8 +4,7 @@ import Home from './components/Home';
 import About from './components/About';
 import Navbar from './components/Navbar';
 import Productos from './components/Productos';
-import SearchBar from './components/SearchBar'; // Importamos el componente SearchBar
-import Logo from './components/Logo'; // Importamos el componente Logo
+import Header from './components/Header'; // Importamos el nuevo componente Header
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -13,8 +12,7 @@ function App() {
   return (
     <Router>
       <div>
-        <Logo /> {/* Agregamos el componente del logo */}
-        <SearchBar /> {/* Agregamos la barra de búsqueda */}
+        <Header /> {/* Reemplazamos con el nuevo componente Header que incluye el logo y la barra de búsqueda */}
         <Navbar /> {/* La barra de navegación se desplaza hacia abajo */}
         <Routes>
           <Route path="/" element={<Home />} />

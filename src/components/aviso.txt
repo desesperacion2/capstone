@@ -1,0 +1,1 @@
+los componentes searchbar y logo.js se juntaron en uno header.js. no quise borrar los otros por si pasaba algo
