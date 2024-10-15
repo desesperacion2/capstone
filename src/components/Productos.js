@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { db } from '../firebase-config';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Asegúrate de que Bootstrap esté importado
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Productos = () => {
+const Productos = ({ carrito, setCarrito }) => {
   const [productos, setProductos] = useState([]);
+  const [cantidad, setCantidad] = useState(1); // Estado para controlar la cantidad
+  const [productoSeleccionado, setProductoSeleccionado] = useState(null); // Estado para el producto seleccionado
 
   // Función para obtener productos desde Firestore
   const fetchProductos = async () => {
@@ -29,14 +31,14 @@ const Productos = () => {
           const formatosSnapshot = await getDocs(formatosRef);
           const formatos = formatosSnapshot.docs.map((formatoDoc) => ({
             id: formatoDoc.id,
-            ...formatoDoc.data(), // Tomamos todos los campos, incluyendo "formato"
+            ...formatoDoc.data(),
           }));
 
           data.formatos = formatos;
 
           // Seleccionar el primer formato por defecto
           if (formatos.length > 0) {
-            data.formatoSeleccionado = formatos[0].formato; // Usamos el campo "formato"
+            data.formatoSeleccionado = formatos[0].formato;
             data.precio = formatos[0].precio;
             data.stock = formatos[0].stock;
           } else {
@@ -73,6 +75,63 @@ const Productos = () => {
     );
   };
 
+  // Función para agregar un producto al carrito
+  const agregarAlCarrito = (producto) => {
+    if (productoSeleccionado) {
+      const productoEnCarrito = carrito.find(
+        (item) =>
+          item.id === productoSeleccionado.id &&
+          item.formatoSeleccionado === productoSeleccionado.formatoSeleccionado
+      );
+
+      if (productoEnCarrito) {
+        const nuevaCantidad = productoEnCarrito.cantidad + cantidad;
+
+        // Validar si la nueva cantidad no supera el stock
+        if (nuevaCantidad <= productoSeleccionado.stock) {
+          const nuevoCarrito = carrito.map((item) =>
+            item.id === productoSeleccionado.id &&
+            item.formatoSeleccionado === productoSeleccionado.formatoSeleccionado
+              ? { ...item, cantidad: nuevaCantidad }
+              : item
+          );
+          setCarrito(nuevoCarrito);
+          localStorage.setItem('carrito', JSON.stringify(nuevoCarrito));
+        } else {
+          console.log('No hay suficiente stock disponible');
+        }
+      } else {
+        // Validar si la cantidad no supera el stock al añadir un nuevo producto
+        if (cantidad > 0 && cantidad <= productoSeleccionado.stock) {
+          const nuevoCarrito = [...carrito, { ...productoSeleccionado, cantidad }];
+          setCarrito(nuevoCarrito);
+          localStorage.setItem('carrito', JSON.stringify(nuevoCarrito));
+        } else {
+          console.log('No hay suficiente stock disponible');
+        }
+      }
+
+      setCantidad(1);
+      setProductoSeleccionado(null);
+    } else {
+      setProductoSeleccionado({ ...producto, cantidad });
+    }
+  };
+
+  // Función para manejar el cambio en el input de cantidad
+  const handleCantidadChange = (e) => {
+    const nuevaCantidad = parseInt(e.target.value, 10);
+    if (!isNaN(nuevaCantidad) && nuevaCantidad > 0 && nuevaCantidad <= (productoSeleccionado?.stock || Infinity)) {
+      setCantidad(nuevaCantidad);
+    }
+  };
+
+  // Función para cancelar la selección
+  const cancelarSeleccion = () => {
+    setCantidad(1);
+    setProductoSeleccionado(null);
+  };
+
   useEffect(() => {
     fetchProductos();
   }, []);
@@ -84,7 +143,6 @@ const Productos = () => {
         {productos.map((producto) => (
           <div key={producto.id} className="col-md-4 mb-4">
             <div className="card h-100">
-              {/* Imagen del producto */}
               <img
                 src={producto.imagenUrl}
                 alt={producto.nombre}
@@ -92,13 +150,8 @@ const Productos = () => {
                 style={{ maxHeight: '200px', objectFit: 'contain' }}
               />
               <div className="card-body text-center">
-                {/* Nombre del producto */}
                 <h5 className="card-title">{producto.nombre}</h5>
-
-                {/* Descripción del producto */}
                 <p className="card-text">{producto.descripcion}</p>
-
-                {/* Dropdown para seleccionar formato */}
                 <div className="dropdown mb-3">
                   <button
                     className="btn btn-secondary dropdown-toggle"
@@ -117,7 +170,7 @@ const Productos = () => {
                             className="dropdown-item"
                             onClick={() => handleFormatoChange(producto.id, formato.formato)}
                           >
-                            {formato.formato} {/* Ahora usamos el campo "formato" */}
+                            {formato.formato}
                           </button>
                         </li>
                       ))
@@ -126,19 +179,46 @@ const Productos = () => {
                     )}
                   </ul>
                 </div>
-
-                {/* Precio del producto */}
                 <p className="card-text">
                   <strong>Precio:</strong> ${producto.precio}
                 </p>
-
-                {/* Stock disponible */}
                 <p className="card-text">
                   <strong>Stock disponible:</strong> {producto.stock}
                 </p>
 
-                {/* Botón para agregar al carrito */}
-                <button className="btn btn-primary">Agregar al carrito</button>
+                {/* Input para seleccionar la cantidad */}
+                {productoSeleccionado?.id === producto.id ? (
+                  <div className="mb-3">
+                    <input
+                      type="number"
+                      className="form-control"
+                      style={{ width: '80px', margin: '0 auto' }}
+                      value={cantidad}
+                      onChange={handleCantidadChange}
+                      min="1"
+                      max={productoSeleccionado?.stock || Infinity}
+                    />
+                  </div>
+                ) : null}
+
+                <div>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => agregarAlCarrito(producto)}
+                  >
+                    {productoSeleccionado?.id === producto.id ? 'Confirmar cantidad' : 'Agregar al carrito'}
+                  </button>
+
+                  {/* Botón de Cancelar */}
+                  {productoSeleccionado?.id === producto.id && (
+                    <button
+                      className="btn btn-secondary ms-2"
+                      onClick={cancelarSeleccion}
+                    >
+                      Cancelar
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

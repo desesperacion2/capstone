@@ -1,24 +1,44 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './components/Home';
 import About from './components/About';
 import Navbar from './components/Navbar';
 import Productos from './components/Productos';
-import Header from './components/Header'; // Importamos el nuevo componente Header
-
+import Header from './components/Header';
+import Carrito from './components/Carrito';
+import Footer from './components/Footer'; // Asegúrate de importar el Footer
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
+  const [carrito, setCarrito] = useState([]);
+
+  // Recuperar el carrito del localStorage al iniciar la aplicación
+  useEffect(() => {
+    const carritoGuardado = localStorage.getItem('carrito');
+    if (carritoGuardado) {
+      setCarrito(JSON.parse(carritoGuardado));
+    }
+  }, []);
+
+  // Guardar el carrito en localStorage cada vez que cambie
+  useEffect(() => {
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+  }, [carrito]);
+
   return (
     <Router>
-      <div>
-        <Header /> {/* Reemplazamos con el nuevo componente Header que incluye el logo y la barra de búsqueda */}
-        <Navbar /> {/* La barra de navegación se desplaza hacia abajo */}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/productos" element={<Productos />} />
-        </Routes>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Header />
+        <Navbar />
+        <div style={{ flex: '1' }}> {/* Este div flex crecerá para ocupar el espacio disponible */}
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/productos" element={<Productos carrito={carrito} setCarrito={setCarrito} />} />
+            <Route path="/carrito" element={<Carrito carrito={carrito} setCarrito={setCarrito} />} />
+          </Routes>
+        </div>
+        <Footer /> {/* Footer al final */}
       </div>
     </Router>
   );
