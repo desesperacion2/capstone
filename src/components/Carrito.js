@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import ActualizarStock from './ActualizarStock'; // Importar el nuevo componente
+import ActualizarStock from './ActualizarStock'; // Importar el componente ActualizarStock
 
 const Carrito = ({ carrito, setCarrito }) => {
   const [cantidad, setCantidad] = useState({});
+  const [compraExitosa, setCompraExitosa] = useState(false); // Estado para la notificación de compra exitosa
 
   const formatearPrecio = (precio) => {
     return precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -48,9 +49,16 @@ const Carrito = ({ carrito, setCarrito }) => {
 
   const total = calcularTotal();
 
+  const handleCompraExitosa = () => {
+    vaciarCarrito(); // Vaciar el carrito después de la compra
+    setCompraExitosa(true); // Mostrar mensaje de compra exitosa
+  };
+
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">Carrito de Compras</h1>
+      {compraExitosa && <p className="alert alert-success text-center">¡Compra exitosa!</p>} {/* Mostrar mensaje */}
+
       {carrito.length === 0 ? (
         <p className="text-center">Tu carrito está vacío.</p>
       ) : (
@@ -103,8 +111,8 @@ const Carrito = ({ carrito, setCarrito }) => {
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-center">
             <h4>Total: ${formatearPrecio(total)}</h4>
             <div className="mt-3 mt-md-0">
-              {/* Llamada al nuevo componente para actualizar el stock */}
-              <ActualizarStock carrito={carrito} /> 
+              {/* Pasar la función handleCompraExitosa a ActualizarStock */}
+              <ActualizarStock carrito={carrito} onCompraExitosa={handleCompraExitosa} />
               <button className="btn btn-danger ms-2" onClick={vaciarCarrito}>
                 Vaciar carrito
               </button>
