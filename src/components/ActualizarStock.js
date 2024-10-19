@@ -1,5 +1,6 @@
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase-config';
+import emailjs from 'emailjs-com'; // Asegúrate de haber instalado emailjs-com
 
 const ActualizarStock = ({ carrito, onCompraExitosa }) => {
   const actualizarStock = async () => {
@@ -14,14 +15,14 @@ const ActualizarStock = ({ carrito, onCompraExitosa }) => {
         } else if (producto.id === 'PizzaJamon') {
           formatoNombre = formatoNombre.replace(/23cmy290gramos/i, '23cm290g');
         } else if (producto.id === 'PizzaPepperoni') {
-          formatoNombre = formatoNombre.replace(/23cmy290gramos/i, '23cm290g'); 
-        } else if (producto.id === 'PizzaVeggieAceitunas') { 
+          formatoNombre = formatoNombre.replace(/23cmy290gramos/i, '23cm290g');
+        } else if (producto.id === 'PizzaVeggieAceitunas') {
           formatoNombre = formatoNombre.replace(/23cmy300gramos/i, '23cm300g');
         } else if (producto.id === 'PizzaVeggieProteinaSoyaAceitunas') {
           formatoNombre = formatoNombre.replace(/23cmy300gramos/i, '23cm300g');
         } else if (producto.id === 'PizzaVeggieProteinaSoyaTomates') {
           formatoNombre = formatoNombre.replace(/23cmy300gramos/i, '23cm300g');
-        } else if (producto.id === 'PizzaVeggieVerduras') { 
+        } else if (producto.id === 'PizzaVeggieVerduras') {
           formatoNombre = formatoNombre.replace(/23cmy300gramos/i, '23cm300g');
         } else {
           // Corregir el formato si es necesario para asegurar la 'U' mayúscula en "Unidades"
@@ -40,6 +41,13 @@ const ActualizarStock = ({ carrito, onCompraExitosa }) => {
 
         // Actualizar el stock en Firestore
         await updateDoc(formatoRef, { stock: nuevoStock });
+
+        // Enviar un correo electrónico según el nivel de stock
+        if (nuevoStock === 0) {
+          enviarCorreoAgotado(producto.nombre);
+        } else if (nuevoStock <= 4) {
+          enviarCorreoBajoStock(producto.nombre, nuevoStock);
+        }
       }
 
       // Llamar a la función de éxito después de actualizar el stock
@@ -47,6 +55,35 @@ const ActualizarStock = ({ carrito, onCompraExitosa }) => {
     } catch (error) {
       console.error('Error al actualizar el stock:', error);
     }
+  };
+
+  const enviarCorreoBajoStock = (nombreProducto, stock) => {
+    const templateParams = {
+      to_email: 'emilioestebansuazo@gmail.com', // Reemplaza con tu dirección de correo
+      product_name: nombreProducto,
+      stock_quantity: stock,
+    };
+
+    emailjs.send('service_wfl68aj', 'template_nxgfcmt', templateParams, '3Fz3DdCNxBCbRv-Ga')
+      .then((response) => {
+        console.log('Correo de bajo stock enviado con éxito:', response.status, response.text);
+      }, (error) => {
+        console.error('Error al enviar el correo de bajo stock:', error);
+      });
+  };
+
+  const enviarCorreoAgotado = (nombreProducto) => {
+    const templateParams = {
+      to_email: 'emilioestebansuazo@gmail.com', // Reemplaza con tu dirección de correo
+      product_name: nombreProducto,
+    };
+
+    emailjs.send('service_wfl68aj', 'template_cj3dg8t', templateParams, '3Fz3DdCNxBCbRv-Ga')
+      .then((response) => {
+        console.log('Correo de producto agotado enviado con éxito:', response.status, response.text);
+      }, (error) => {
+        console.error('Error al enviar el correo de producto agotado:', error);
+      });
   };
 
   return (
