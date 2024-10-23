@@ -1,10 +1,33 @@
-import { doc, updateDoc } from 'firebase/firestore';
+import React from 'react';
+import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebase-config';
-import emailjs from 'emailjs-com'; // Asegúrate de haber instalado emailjs-com
+import emailjs from 'emailjs-com';
 
-const ActualizarStock = ({ carrito, onCompraExitosa }) => {
-  const actualizarStock = async () => {
+const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
+  const confirmarPedido = async () => {
     try {
+      // Crear un objeto de pedido
+      const pedido = {
+        cliente: {
+          nombre: formularioDatos.nombre,
+          telefono: formularioDatos.telefono,
+          direccion: formularioDatos.direccion,
+        },
+        fechaPedido: new Date().toISOString().split('T')[0], // Obtiene la fecha en formato YYYY-MM-DD
+        productos: carrito.map((producto) => ({
+          cantidad: producto.cantidad,
+          descripcion: producto.descripcion,
+          formatoSeleccionado: producto.formatoSeleccionado,
+          precio: producto.precio,
+        })),
+        total: carrito.reduce((total, item) => total + item.precio * item.cantidad, 0),
+      };
+
+      // Guardar datos del pedido en Firebase
+      const pedidosRef = collection(db, 'Pedidos');
+      await addDoc(pedidosRef, pedido);
+
+      // Actualizar el stock de cada producto
       for (const producto of carrito) {
         // Normalización del nombre del formato
         let formatoNombre = producto.formatoSeleccionado.replace(/\s/g, '');
@@ -25,7 +48,6 @@ const ActualizarStock = ({ carrito, onCompraExitosa }) => {
         } else if (producto.id === 'PizzaVeggieVerduras') {
           formatoNombre = formatoNombre.replace(/23cmy300gramos/i, '23cm300g');
         } else {
-          // Corregir el formato si es necesario para asegurar la 'U' mayúscula en "Unidades"
           formatoNombre = formatoNombre.replace(/unidades/i, 'Unidades');
         }
 
@@ -53,7 +75,7 @@ const ActualizarStock = ({ carrito, onCompraExitosa }) => {
       // Llamar a la función de éxito después de actualizar el stock
       onCompraExitosa();
     } catch (error) {
-      console.error('Error al actualizar el stock:', error);
+      console.error('Error al confirmar el pedido:', error);
     }
   };
 
@@ -87,8 +109,8 @@ const ActualizarStock = ({ carrito, onCompraExitosa }) => {
   };
 
   return (
-    <button className="btn btn-success" onClick={actualizarStock}>
-      Comprar
+    <button className="btn btn-success" onClick={confirmarPedido}>
+      Confirmar Pedido
     </button>
   );
 };

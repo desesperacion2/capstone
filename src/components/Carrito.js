@@ -4,6 +4,13 @@ import ActualizarStock from './ActualizarStock'; // Importar el componente Actua
 const Carrito = ({ carrito, setCarrito }) => {
   const [cantidad, setCantidad] = useState({});
   const [compraExitosa, setCompraExitosa] = useState(false); // Estado para la notificación de compra exitosa
+  const [mostrarFormulario, setMostrarFormulario] = useState(false); // Estado para mostrar el formulario
+  const [formularioDatos, setFormularioDatos] = useState({
+    nombre: '',
+    telefono: '',
+    direccion: '',
+    fechaPedido: '',
+  });
 
   const formatearPrecio = (precio) => {
     return precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -49,9 +56,22 @@ const Carrito = ({ carrito, setCarrito }) => {
 
   const total = calcularTotal();
 
+  const handleCompra = () => {
+    setMostrarFormulario(true); // Mostrar el formulario cuando se presiona "Comprar"
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormularioDatos((prevDatos) => ({
+      ...prevDatos,
+      [name]: value,
+    }));
+  };
+
   const handleCompraExitosa = () => {
     vaciarCarrito(); // Vaciar el carrito después de la compra
     setCompraExitosa(true); // Mostrar mensaje de compra exitosa
+    setMostrarFormulario(false); // Ocultar formulario después de la compra
   };
 
   return (
@@ -111,13 +131,78 @@ const Carrito = ({ carrito, setCarrito }) => {
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-center">
             <h4>Total: ${formatearPrecio(total)}</h4>
             <div className="mt-3 mt-md-0">
-              {/* Pasar la función handleCompraExitosa a ActualizarStock */}
-              <ActualizarStock carrito={carrito} onCompraExitosa={handleCompraExitosa} />
+              {!mostrarFormulario && (
+                <button className="btn btn-success" onClick={handleCompra}>
+                  Comprar
+                </button>
+              )}
               <button className="btn btn-danger ms-2" onClick={vaciarCarrito}>
                 Vaciar carrito
               </button>
             </div>
           </div>
+
+          {/* Formulario de datos del usuario */}
+          {mostrarFormulario && (
+            <div className="mt-4">
+              <h3>Datos del Pedido</h3>
+              <form>
+                <div className="mb-3">
+                  <label htmlFor="nombre" className="form-label">Nombre</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nombre"
+                    name="nombre"
+                    value={formularioDatos.nombre}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="telefono" className="form-label">Teléfono</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="telefono"
+                    name="telefono"
+                    value={formularioDatos.telefono}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="direccion" className="form-label">Dirección</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="direccion"
+                    name="direccion"
+                    value={formularioDatos.direccion}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="fechaPedido" className="form-label">Fecha de Pedido</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    id="fechaPedido"
+                    name="fechaPedido"
+                    value={formularioDatos.fechaPedido}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </form>
+              <ActualizarStock
+                carrito={carrito}
+                formularioDatos={formularioDatos}
+                onCompraExitosa={handleCompraExitosa}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
