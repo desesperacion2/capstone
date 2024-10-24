@@ -4,6 +4,9 @@ import { db } from '../firebase-config';
 import emailjs from 'emailjs-com';
 
 const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
+  // Verifica si todos los campos están llenos
+  const camposCompletos = formularioDatos.nombre && formularioDatos.telefono && formularioDatos.direccion;
+
   const confirmarPedido = async () => {
     try {
       // Crear un objeto de pedido
@@ -25,11 +28,10 @@ const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
 
       // Guardar datos del pedido en Firebase
       const pedidosRef = collection(db, 'Pedidos');
-      await addDoc(pedidosRef, pedido);
+      const docRef = await addDoc(pedidosRef, pedido); // Almacena el pedido y obtiene el ID
 
       // Actualizar el stock de cada producto
       for (const producto of carrito) {
-        // Normalización del nombre del formato
         let formatoNombre = producto.formatoSeleccionado.replace(/\s/g, '');
 
         // Correcciones específicas para ciertos productos
@@ -51,7 +53,6 @@ const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
           formatoNombre = formatoNombre.replace(/unidades/i, 'Unidades');
         }
 
-        // Crear la referencia correcta al documento
         const formatoRef = doc(db, `Productos/${producto.id}/Formatos`, `Formato${formatoNombre}`);
 
         const nuevoStock = producto.stock - producto.cantidad;
@@ -61,10 +62,8 @@ const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
           continue;
         }
 
-        // Actualizar el stock en Firestore
         await updateDoc(formatoRef, { stock: nuevoStock });
 
-        // Enviar un correo electrónico según el nivel de stock
         if (nuevoStock === 0) {
           enviarCorreoAgotado(producto.nombre);
         } else if (nuevoStock <= 4) {
@@ -72,8 +71,7 @@ const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
         }
       }
 
-      // Llamar a la función de éxito después de actualizar el stock
-      onCompraExitosa();
+      onCompraExitosa(docRef.id); // Pasar el ID del pedido exitoso
     } catch (error) {
       console.error('Error al confirmar el pedido:', error);
     }
@@ -81,7 +79,7 @@ const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
 
   const enviarCorreoBajoStock = (nombreProducto, stock) => {
     const templateParams = {
-      to_email: 'emilioestebansuazo@gmail.com', // Reemplaza con tu dirección de correo
+      to_email: 'emilioestebansuazo@gmail.com',
       product_name: nombreProducto,
       stock_quantity: stock,
     };
@@ -96,7 +94,7 @@ const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
 
   const enviarCorreoAgotado = (nombreProducto) => {
     const templateParams = {
-      to_email: 'emilioestebansuazo@gmail.com', // Reemplaza con tu dirección de correo
+      to_email: 'emilioestebansuazo@gmail.com',
       product_name: nombreProducto,
     };
 
@@ -109,7 +107,11 @@ const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
   };
 
   return (
-    <button className="btn btn-success" onClick={confirmarPedido}>
+    <button
+      className="btn btn-success"
+      onClick={confirmarPedido}
+      disabled={!camposCompletos} // Deshabilita el botón si algún campo está vacío
+    >
       Confirmar Pedido
     </button>
   );

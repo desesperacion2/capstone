@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ActualizarStock from './ActualizarStock'; // Importar el componente ActualizarStock
 
 const Carrito = ({ carrito, setCarrito }) => {
@@ -11,9 +11,22 @@ const Carrito = ({ carrito, setCarrito }) => {
     direccion: '',
     fechaPedido: '',
   });
+  const [compraId, setCompraId] = useState(null); // Estado para almacenar el ID de la compra
+  const [mostrarIdCompra, setMostrarIdCompra] = useState(false); // Estado para mostrar el ID de compra
+
+  // Utiliza useEffect para ocultar el mensaje de compra exitosa después de 5 segundos
+  useEffect(() => {
+    if (compraExitosa) {
+      const timer = setTimeout(() => {
+        setCompraExitosa(false); // Oculta el mensaje de compra exitosa
+        setMostrarIdCompra(true); // Muestra el ID de compra
+      }, 1000); // 5000 milisegundos = 5 segundos
+      return () => clearTimeout(timer); // Limpia el timer si el componente se desmonta
+    }
+  }, [compraExitosa]);
 
   const formatearPrecio = (precio) => {
-    return precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return precio.toString().replace(/\B(?=(\d{3})+(?!))/g, ".");
   };
 
   const handleCantidadChange = (productoId, formatoSeleccionado, e) => {
@@ -68,16 +81,31 @@ const Carrito = ({ carrito, setCarrito }) => {
     }));
   };
 
-  const handleCompraExitosa = () => {
+  const handleCompraExitosa = (idCompra) => {
     vaciarCarrito(); // Vaciar el carrito después de la compra
     setCompraExitosa(true); // Mostrar mensaje de compra exitosa
+    setCompraId(idCompra); // Almacenar el ID de la compra
     setMostrarFormulario(false); // Ocultar formulario después de la compra
   };
 
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">Carrito de Compras</h1>
-      {compraExitosa && <p className="alert alert-success text-center">¡Compra exitosa!</p>} {/* Mostrar mensaje */}
+
+      {/* Mensaje de Compra Exitosa */}
+      {compraExitosa && (
+        <div className="alert alert-success text-center">
+          ¡Compra exitosa!
+        </div>
+      )}
+
+      {/* ID de la Compra */}
+      {mostrarIdCompra && compraId && (
+        <div className="text-center mb-4">
+          <p>ID de la Compra: <strong>{compraId}</strong></p>
+          <p>Por favor, guarda este ID para futuras referencias.</p>
+        </div>
+      )}
 
       {carrito.length === 0 ? (
         <p className="text-center">Tu carrito está vacío.</p>
@@ -126,6 +154,7 @@ const Carrito = ({ carrito, setCarrito }) => {
                 </div>
               </div>
             ))}
+
           </div>
 
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-center">
@@ -196,10 +225,10 @@ const Carrito = ({ carrito, setCarrito }) => {
                   />
                 </div>
               </form>
-              <ActualizarStock
-                carrito={carrito}
+              <ActualizarStock 
                 formularioDatos={formularioDatos}
-                onCompraExitosa={handleCompraExitosa}
+                onCompraExitosa={handleCompraExitosa} 
+                carrito={carrito} 
               />
             </div>
           )}
