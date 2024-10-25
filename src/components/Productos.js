@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
-import { db } from '../firebase-config';
+import { db } from '../firebase-config.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Productos = ({ carrito, setCarrito }) => {

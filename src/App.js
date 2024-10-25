@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './components/Home';
-import About from './components/About';
-import Navbar from './components/Navbar';
-import Productos from './components/Productos';
-import Header from './components/Header';
-import Carrito from './components/Carrito';
-import Footer from './components/Footer'; // Asegúrate de importar el Footer
+import Home from './components/Home.js';
+import About from './components/About.js';
+import Navbar from './components/Navbar.js';
+import Productos from './components/Productos.js';
+import Header from './components/Header.js';
+import Carrito from './components/Carrito.js';
+import Footer from './components/Footer.js'; // Asegúrate de importar el Footer
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {

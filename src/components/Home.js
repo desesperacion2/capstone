@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase-config';  // Asegúrate de que la ruta sea correcta
+import { db } from '../firebase-config.js';  // Asegúrate de que la ruta sea correcta
 
 const Home = () => {
   const [userData, setUserData] = useState({});
