@@ -6,11 +6,12 @@ import Navbar from './components/Navbar';
 import Productos from './components/Productos';
 import Header from './components/Header';
 import Carrito from './components/Carrito';
-import Footer from './components/Footer'; // Asegúrate de importar el Footer
+import Footer from './components/Footer';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   const [carrito, setCarrito] = useState([]);
+  const [busqueda, setBusqueda] = useState(''); // Estado para el término de búsqueda
 
   // Recuperar el carrito del localStorage al iniciar la aplicación
   useEffect(() => {
@@ -28,13 +29,13 @@ function App() {
   return (
     <Router>
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Header />
+        <Header setBusqueda={setBusqueda} /> {/* Pasar setBusqueda como prop */}
         <Navbar />
         <div style={{ flex: '1' }}> {/* Este div flex crecerá para ocupar el espacio disponible */}
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
-            <Route path="/productos" element={<Productos carrito={carrito} setCarrito={setCarrito} />} />
+            <Route path="/productos" element={<Productos carrito={carrito} setCarrito={setCarrito} busqueda={busqueda} />} />
             <Route path="/carrito" element={<Carrito carrito={carrito} setCarrito={setCarrito} />} />
           </Routes>
         </div>

@@ -4,7 +4,7 @@ import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { db } from '../firebase-config';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Productos = ({ carrito, setCarrito }) => {
+const Productos = ({ carrito, setCarrito, busqueda }) => {
   const [productos, setProductos] = useState([]);
   const [cantidad, setCantidad] = useState(1); // Estado para controlar la cantidad
   const [productoSeleccionado, setProductoSeleccionado] = useState(null); // Estado para el producto seleccionado
@@ -136,93 +136,102 @@ const Productos = ({ carrito, setCarrito }) => {
     fetchProductos();
   }, []);
 
+  // Filtrar productos según el término de búsqueda
+  const productosFiltrados = productos.filter(producto =>
+    producto.nombre.toLowerCase().includes(busqueda.toLowerCase())
+  );
+
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">Productos Disponibles</h1>
       <div className="row">
-        {productos.map((producto) => (
-          <div key={producto.id} className="col-md-4 mb-4">
-            <div className="card h-100">
-              <img
-                src={producto.imagenUrl}
-                alt={producto.nombre}
-                className="card-img-top"
-                style={{ maxHeight: '200px', objectFit: 'contain' }}
-              />
-              <div className="card-body text-center">
-                <h5 className="card-title">{producto.nombre}</h5>
-                <p className="card-text">{producto.descripcion}</p>
-                <div className="dropdown mb-3">
-                  <button
-                    className="btn btn-secondary dropdown-toggle"
-                    type="button"
-                    id={`dropdown-${producto.id}`}
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    Formato: {producto.formatoSeleccionado}
-                  </button>
-                  <ul className="dropdown-menu" aria-labelledby={`dropdown-${producto.id}`}>
-                    {producto.formatos && producto.formatos.length > 0 ? (
-                      producto.formatos.map((formato) => (
-                        <li key={formato.id}>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => handleFormatoChange(producto.id, formato.formato)}
-                          >
-                            {formato.formato}
-                          </button>
-                        </li>
-                      ))
-                    ) : (
-                      <li>No hay formatos disponibles</li>
-                    )}
-                  </ul>
-                </div>
-                <p className="card-text">
-                  <strong>Precio:</strong> ${producto.precio}
-                </p>
-                <p className="card-text">
-                  <strong>Stock disponible:</strong> {producto.stock}
-                </p>
-
-                {/* Input para seleccionar la cantidad */}
-                {productoSeleccionado?.id === producto.id ? (
-                  <div className="mb-3">
-                    <input
-                      type="number"
-                      className="form-control"
-                      style={{ width: '80px', margin: '0 auto' }}
-                      value={cantidad}
-                      onChange={handleCantidadChange}
-                      min="1"
-                      max={productoSeleccionado?.stock || Infinity}
-                    />
-                  </div>
-                ) : null}
-
-                <div>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => agregarAlCarrito(producto)}
-                  >
-                    {productoSeleccionado?.id === producto.id ? 'Confirmar cantidad' : 'Agregar al carrito'}
-                  </button>
-
-                  {/* Botón de Cancelar */}
-                  {productoSeleccionado?.id === producto.id && (
+        {productosFiltrados.length > 0 ? (
+          productosFiltrados.map((producto) => (
+            <div key={producto.id} className="col-md-4 mb-4">
+              <div className="card h-100">
+                <img
+                  src={producto.imagenUrl}
+                  alt={producto.nombre}
+                  className="card-img-top"
+                  style={{ maxHeight: '200px', objectFit: 'contain' }}
+                />
+                <div className="card-body text-center">
+                  <h5 className="card-title">{producto.nombre}</h5>
+                  <p className="card-text">{producto.descripcion}</p>
+                  <div className="dropdown mb-3">
                     <button
-                      className="btn btn-secondary ms-2"
-                      onClick={cancelarSeleccion}
+                      className="btn btn-secondary dropdown-toggle"
+                      type="button"
+                      id={`dropdown-${producto.id}`}
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
                     >
-                      Cancelar
+                      Formato: {producto.formatoSeleccionado}
                     </button>
-                  )}
+                    <ul className="dropdown-menu" aria-labelledby={`dropdown-${producto.id}`}>
+                      {producto.formatos && producto.formatos.length > 0 ? (
+                        producto.formatos.map((formato) => (
+                          <li key={formato.id}>
+                            <button
+                              className="dropdown-item"
+                              onClick={() => handleFormatoChange(producto.id, formato.formato)}
+                            >
+                              {formato.formato}
+                            </button>
+                          </li>
+                        ))
+                      ) : (
+                        <li>No hay formatos disponibles</li>
+                      )}
+                    </ul>
+                  </div>
+                  <p className="card-text">
+                    <strong>Precio:</strong> ${producto.precio}
+                  </p>
+                  <p className="card-text">
+                    <strong>Stock disponible:</strong> {producto.stock}
+                  </p>
+
+                  {/* Input para seleccionar la cantidad */}
+                  {productoSeleccionado?.id === producto.id ? (
+                    <div className="mb-3">
+                      <input
+                        type="number"
+                        className="form-control"
+                        style={{ width: '80px', margin: '0 auto' }}
+                        value={cantidad}
+                        onChange={handleCantidadChange}
+                        min="1"
+                        max={productoSeleccionado?.stock || Infinity}
+                      />
+                    </div>
+                  ) : null}
+
+                  <div>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => agregarAlCarrito(producto)}
+                    >
+                      {productoSeleccionado?.id === producto.id ? 'Confirmar cantidad' : 'Agregar al carrito'}
+                    </button>
+
+                    {/* Botón de Cancelar */}
+                    {productoSeleccionado?.id === producto.id && (
+                      <button
+                        className="btn btn-secondary ms-2"
+                        onClick={cancelarSeleccion}
+                      >
+                        Cancelar
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p>No se encontraron productos.</p>
+        )}
       </div>
     </div>
   );
