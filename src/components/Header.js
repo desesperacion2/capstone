@@ -64,7 +64,7 @@ const Header = ({ setBusqueda }) => {
       <div className="container-fluid d-flex justify-content-between align-items-center">
         <Link to="/">
           <img
-            src="https://firebasestorage.googleapis.com/v0/b/alcobiobio-99968.appspot.com/o/logo.jpeg?alt=media&token=150a90e1-8dd3-4bf0-a6cf-3ebb6a115bca"
+            src="https://firebasestorage.googleapis.com/v0/b/alcobiobio-99968.appspot.com/o/logo2.jpg?alt=media&token=e29d4ab3-4a27-4f99-93c9-1c4dc715b14f"
             alt="Logo"
             className="img-thumbnail"
             style={{ width: '150px', height: 'auto' }}
