@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import ActualizarStock from './ActualizarStock'; // Importar el componente ActualizarStock
+import ActualizarStock from './ActualizarStock';
 
 const Carrito = ({ carrito, setCarrito }) => {
   const [cantidad, setCantidad] = useState({});
-  const [compraExitosa, setCompraExitosa] = useState(false); // Estado para la notificación de compra exitosa
-  const [mostrarFormulario, setMostrarFormulario] = useState(false); // Estado para mostrar el formulario
+  const [compraExitosa, setCompraExitosa] = useState(false);
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [formularioDatos, setFormularioDatos] = useState({
     nombre: '',
     telefono: '',
     direccion: '',
     fechaPedido: '',
   });
-  const [compraId, setCompraId] = useState(null); // Estado para almacenar el ID de la compra
-  const [mostrarIdCompra, setMostrarIdCompra] = useState(false); // Estado para mostrar el ID de compra
+  const [compraId, setCompraId] = useState(null);
+  const [mostrarIdCompra, setMostrarIdCompra] = useState(false);
+  const [mostrarDatosBancarios, setMostrarDatosBancarios] = useState(false);
 
-  // Utiliza useEffect para ocultar el mensaje de compra exitosa después de 5 segundos
   useEffect(() => {
     if (compraExitosa) {
       const timer = setTimeout(() => {
-        setCompraExitosa(false); // Oculta el mensaje de compra exitosa
-        setMostrarIdCompra(true); // Muestra el ID de compra
-      }, 1000); // 5000 milisegundos = 5 segundos
-      return () => clearTimeout(timer); // Limpia el timer si el componente se desmonta
+        setCompraExitosa(false);
+        setMostrarIdCompra(true);
+      }, 1000);
+      return () => clearTimeout(timer);
     }
   }, [compraExitosa]);
 
@@ -39,7 +39,6 @@ const Carrito = ({ carrito, setCarrito }) => {
 
   const eliminarDelCarrito = (productoId, formatoSeleccionado) => {
     const cantidadEliminar = cantidad[`${productoId}-${formatoSeleccionado}`] || 0;
-
     const nuevoCarrito = carrito
       .map((item) => {
         if (item.id === productoId && item.formatoSeleccionado === formatoSeleccionado) {
@@ -70,7 +69,7 @@ const Carrito = ({ carrito, setCarrito }) => {
   const total = calcularTotal();
 
   const handleCompra = () => {
-    setMostrarFormulario(true); // Mostrar el formulario cuando se presiona "Comprar"
+    setMostrarFormulario(true);
   };
 
   const handleInputChange = (e) => {
@@ -82,30 +81,46 @@ const Carrito = ({ carrito, setCarrito }) => {
   };
 
   const handleCompraExitosa = (idCompra) => {
-    vaciarCarrito(); // Vaciar el carrito después de la compra
-    setCompraExitosa(true); // Mostrar mensaje de compra exitosa
-    setCompraId(idCompra); // Almacenar el ID de la compra
-    setMostrarFormulario(false); // Ocultar formulario después de la compra
+    vaciarCarrito();
+    setCompraExitosa(true);
+    setCompraId(idCompra);
+    setMostrarFormulario(false);
+    setMostrarDatosBancarios(false);
   };
+
+  const camposCompletos =
+    formularioDatos.nombre &&
+    formularioDatos.telefono &&
+    formularioDatos.direccion &&
+    formularioDatos.fechaPedido;
 
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">Carrito de Compras</h1>
 
-      {/* Mensaje de Compra Exitosa */}
       {compraExitosa && (
         <div className="alert alert-success text-center">
           ¡Compra exitosa!
         </div>
       )}
 
-      {/* ID de la Compra */}
       {mostrarIdCompra && compraId && (
-        <div className="text-center mb-4">
-          <p>ID de la Compra: <strong>{compraId}</strong></p>
-          <p>Por favor, guarda este ID para futuras referencias.</p>
-        </div>
+  <div className="text-center mb-4">
+    <p>ID de la Compra: <strong>{compraId}</strong></p>
+    <p>Por favor, envíe su comprobante de pago via WhatsApp, indicando el ID de la compra.</p>
+    <p>
+      <a 
+        href={`https://wa.me/56945768174?text=Hola mi nombre es: ${formularioDatos.nombre}%0AQuiero confirmar mi pedido con el ID: ${compraId}`} // Asegúrate de cambiar el número a tu número real
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary" // Puedes usar cualquier clase de estilo que prefieras
+      >
+        Presione aqui para enviar comprobando via WhatsApp
+      </a>
+    </p>
+  </div>
       )}
+
 
       {carrito.length === 0 ? (
         <p className="text-center">Tu carrito está vacío.</p>
@@ -154,7 +169,6 @@ const Carrito = ({ carrito, setCarrito }) => {
                 </div>
               </div>
             ))}
-
           </div>
 
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-center">
@@ -171,64 +185,70 @@ const Carrito = ({ carrito, setCarrito }) => {
             </div>
           </div>
 
-          {/* Formulario de datos del usuario */}
           {mostrarFormulario && (
-            <div className="mt-4">
+            <form className="mt-4">
               <h3>Datos del Pedido</h3>
-              <form>
-                <div className="mb-3">
-                  <label htmlFor="nombre" className="form-label">Nombre</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="nombre"
-                    name="nombre"
-                    value={formularioDatos.nombre}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="telefono" className="form-label">Teléfono</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="telefono"
-                    name="telefono"
-                    value={formularioDatos.telefono}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="direccion" className="form-label">Dirección</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="direccion"
-                    name="direccion"
-                    value={formularioDatos.direccion}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="fechaPedido" className="form-label">Fecha de Pedido</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    id="fechaPedido"
-                    name="fechaPedido"
-                    value={formularioDatos.fechaPedido}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </form>
-              <ActualizarStock 
+              <input
+                type="text"
+                className="form-control mb-3 w-50"
+                name="nombre"
+                placeholder="Nombre"
+                value={formularioDatos.nombre}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="text"
+                className="form-control mb-3 w-50"
+                name="telefono"
+                placeholder="Teléfono"
+                value={formularioDatos.telefono}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="text"
+                className="form-control mb-3 w-50"
+                name="direccion"
+                placeholder="Dirección"
+                value={formularioDatos.direccion}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="date"
+                className="form-control mb-3 w-50"
+                name="fechaPedido"
+                value={formularioDatos.fechaPedido}
+                onChange={handleInputChange}
+                required
+              />
+              <button
+                type="button"
+                className="btn btn-primary mt-3"
+                onClick={() => setMostrarDatosBancarios(true)}
+                disabled={!camposCompletos}
+              >
+                Siguiente
+              </button>
+            </form>
+          )}
+
+          {mostrarDatosBancarios && (
+            <div className="mt-4">
+              <h5>Transfiera el total del pedido a la siguiente cuenta y luego presione en "Confirmar Pedido"</h5>
+              <p>Nombre: Antonia Stevens</p>
+              <p>Rut: 21.145.874-7</p>
+              <p>Banco: Banco de Chile</p>
+              <p>Tipo de cuenta: Cuenta Vista</p>
+              <p>Cuenta: 07-593-01228-10</p>
+              <p>Correo: antostevens3@gmail.com</p>
+              <b>Monto: ${formatearPrecio(total)}</b>
+              <div style={{ margin: '10px 0' }}></div>
+              <ActualizarStock
+                carrito={carrito}
                 formularioDatos={formularioDatos}
-                onCompraExitosa={handleCompraExitosa} 
-                carrito={carrito} 
+                onCompraExitosa={handleCompraExitosa}
               />
             </div>
           )}

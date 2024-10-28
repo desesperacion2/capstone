@@ -4,9 +4,7 @@ import { db } from '../firebase-config';
 import emailjs from 'emailjs-com';
 
 const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
-  // Verifica si todos los campos están llenos
-  const camposCompletos = formularioDatos.nombre && formularioDatos.telefono && formularioDatos.direccion;
-
+  
   const confirmarPedido = async () => {
     try {
       // Crear un objeto de pedido
@@ -110,7 +108,6 @@ const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
     <button
       className="btn btn-success"
       onClick={confirmarPedido}
-      disabled={!camposCompletos} // Deshabilita el botón si algún campo está vacío
     >
       Confirmar Pedido
     </button>
