@@ -1,6 +1,6 @@
 import React from 'react';
 import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase-config.js';
+import { db } from '../firebase-config';
 import emailjs from 'emailjs-com';
 
 const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {

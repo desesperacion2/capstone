@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ActualizarStock from './ActualizarStock.js'; // Importar el componente ActualizarStock
+import ActualizarStock from './ActualizarStock'; // Importar el componente ActualizarStock
 
 const Carrito = ({ carrito, setCarrito }) => {
   const [cantidad, setCantidad] = useState({});
