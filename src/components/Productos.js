@@ -6,10 +6,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Productos = ({ carrito, setCarrito, busqueda }) => {
   const [productos, setProductos] = useState([]);
-  const [cantidad, setCantidad] = useState(1); // Estado para controlar la cantidad
-  const [productoSeleccionado, setProductoSeleccionado] = useState(null); // Estado para el producto seleccionado
+  const [cantidad, setCantidad] = useState(1);
+  const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+  const [productoAgregadoId, setProductoAgregadoId] = useState(null); // Estado para el ID del producto agregado
+  const [mensajeError, setMensajeError] = useState({}); // Estado para los mensajes de error específicos por producto
 
-  // Función para obtener productos desde Firestore
   const fetchProductos = async () => {
     try {
       const productosRef = collection(db, 'Productos');
@@ -19,14 +20,12 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
         snapshot.docs.map(async (docProducto) => {
           const data = { id: docProducto.id, ...docProducto.data() };
 
-          // Obtén la URL de la imagen desde Firebase Storage
           if (data.imagenPath) {
             const storage = getStorage();
             const url = await getDownloadURL(ref(storage, data.imagenPath));
             data.imagenUrl = url;
           }
 
-          // Obtener formatos disponibles del producto
           const formatosRef = collection(db, `Productos/${docProducto.id}/Formatos`);
           const formatosSnapshot = await getDocs(formatosRef);
           const formatos = formatosSnapshot.docs.map((formatoDoc) => ({
@@ -36,7 +35,6 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
 
           data.formatos = formatos;
 
-          // Seleccionar el primer formato por defecto
           if (formatos.length > 0) {
             data.formatoSeleccionado = formatos[0].formato;
             data.precio = formatos[0].precio;
@@ -75,8 +73,9 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
     );
   };
 
-  // Función para agregar un producto al carrito
   const agregarAlCarrito = (producto) => {
+    setMensajeError((prev) => ({ ...prev, [producto.id]: null })); // Restablecer el mensaje de error para el producto específico
+
     if (productoSeleccionado) {
       const productoEnCarrito = carrito.find(
         (item) =>
@@ -87,7 +86,6 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
       if (productoEnCarrito) {
         const nuevaCantidad = productoEnCarrito.cantidad + cantidad;
 
-        // Validar si la nueva cantidad no supera el stock
         if (nuevaCantidad <= productoSeleccionado.stock) {
           const nuevoCarrito = carrito.map((item) =>
             item.id === productoSeleccionado.id &&
@@ -97,17 +95,40 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
           );
           setCarrito(nuevoCarrito);
           localStorage.setItem('carrito', JSON.stringify(nuevoCarrito));
+          setProductoAgregadoId(productoSeleccionado.id); // Establece el ID del producto agregado
+
+          // Ocultar el mensaje después de 2 segundos
+          setTimeout(() => {
+            setProductoAgregadoId(null);
+          }, 2000);
         } else {
-          console.log('No hay suficiente stock disponible');
+          const errorMsg = "No hay suficiente stock disponible";
+          setMensajeError((prev) => ({ ...prev, [producto.id]: errorMsg })); // Mensaje de error específico para este producto
+          
+          // Ocultar el mensaje de error después de 2 segundos
+          setTimeout(() => {
+            setMensajeError((prev) => ({ ...prev, [producto.id]: null })); // Restablecer el mensaje de error después de 2 segundos
+          }, 2000);
         }
       } else {
-        // Validar si la cantidad no supera el stock al añadir un nuevo producto
         if (cantidad > 0 && cantidad <= productoSeleccionado.stock) {
           const nuevoCarrito = [...carrito, { ...productoSeleccionado, cantidad }];
           setCarrito(nuevoCarrito);
           localStorage.setItem('carrito', JSON.stringify(nuevoCarrito));
+          setProductoAgregadoId(productoSeleccionado.id); // Establece el ID del producto agregado
+
+          // Ocultar el mensaje después de 2 segundos
+          setTimeout(() => {
+            setProductoAgregadoId(null);
+          }, 2000);
         } else {
-          console.log('No hay suficiente stock disponible');
+          const errorMsg = "No hay suficiente stock disponible";
+          setMensajeError((prev) => ({ ...prev, [producto.id]: errorMsg })); // Mensaje de error específico para este producto
+          
+          // Ocultar el mensaje de error después de 2 segundos
+          setTimeout(() => {
+            setMensajeError((prev) => ({ ...prev, [producto.id]: null })); // Restablecer el mensaje de error después de 2 segundos
+          }, 2000);
         }
       }
 
@@ -118,7 +139,6 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
     }
   };
 
-  // Función para manejar el cambio en el input de cantidad
   const handleCantidadChange = (e) => {
     const nuevaCantidad = parseInt(e.target.value, 10);
     if (!isNaN(nuevaCantidad) && nuevaCantidad > 0 && nuevaCantidad <= (productoSeleccionado?.stock || Infinity)) {
@@ -126,7 +146,6 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
     }
   };
 
-  // Función para cancelar la selección
   const cancelarSeleccion = () => {
     setCantidad(1);
     setProductoSeleccionado(null);
@@ -136,7 +155,6 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
     fetchProductos();
   }, []);
 
-  // Filtrar productos según el término de búsqueda
   const productosFiltrados = productos.filter(producto =>
     producto.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
@@ -192,7 +210,6 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
                     <strong>Stock disponible:</strong> {producto.stock}
                   </p>
 
-                  {/* Input para seleccionar la cantidad */}
                   {productoSeleccionado?.id === producto.id ? (
                     <div className="mb-3">
                       <input
@@ -215,7 +232,6 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
                       {productoSeleccionado?.id === producto.id ? 'Confirmar cantidad' : 'Agregar al carrito'}
                     </button>
 
-                    {/* Botón de Cancelar */}
                     {productoSeleccionado?.id === producto.id && (
                       <button
                         className="btn btn-secondary ms-2"
@@ -225,12 +241,26 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
                       </button>
                     )}
                   </div>
+
+                  {/* Mensaje de éxito */}
+                  {productoAgregadoId === producto.id && (
+                    <div style={{ color: 'green', marginTop: '10px' }}>
+                      Se ha agregado al carrito
+                    </div>
+                  )}
+
+                  {/* Mensaje de error específico */}
+                  {mensajeError[producto.id] && (
+                    <div style={{ color: 'red', marginTop: '10px' }}>
+                      {mensajeError[producto.id]}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           ))
         ) : (
-          <p>No se encontraron productos.</p>
+          <div className="col-12 text-center">No hay productos disponibles.</div>
         )}
       </div>
     </div>

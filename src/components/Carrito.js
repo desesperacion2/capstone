@@ -94,6 +94,11 @@ const Carrito = ({ carrito, setCarrito }) => {
     formularioDatos.direccion &&
     formularioDatos.fechaPedido;
 
+    // Calcular la fecha mínima permitida (el día de mañana)
+  const hoy = new Date();
+  hoy.setDate(hoy.getDate() + 1); // AQUI SE PUEDEN CAMBIAR LOS DIAS PARA QUE LA FECHA DE ENTREGA SEA DIFERENTE, MIENTRAS + MAS LEJANA
+  const fechaMinima = hoy.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">Carrito de Compras</h1>
@@ -107,15 +112,15 @@ const Carrito = ({ carrito, setCarrito }) => {
       {mostrarIdCompra && compraId && (
   <div className="text-center mb-4">
     <p>ID de la Compra: <strong>{compraId}</strong></p>
-    <p>Por favor, envíe su comprobante de pago via WhatsApp, indicando el ID de la compra.</p>
+    <p>Por favor, envíe su comprobante de pago vía WhatsApp, indicando el ID de la compra.</p>
     <p>
       <a 
-        href={`https://wa.me/56945768174?text=Hola mi nombre es: ${formularioDatos.nombre}%0AQuiero confirmar mi pedido con el ID: ${compraId}`} // Asegúrate de cambiar el número a tu número real
+        href={`https://wa.me/56945768174?text=Hola mi nombre es ${formularioDatos.nombre}%0AQuiero confirmar mi pedido con el ID: ${compraId}`} // Asegúrate de cambiar el número a tu número real
         target="_blank"
         rel="noopener noreferrer"
         className="text-primary" // Puedes usar cualquier clase de estilo que prefieras
       >
-        Presione aqui para enviar comprobando via WhatsApp
+        Presione aqui para enviar su comprobante vía WhatsApp
       </a>
     </p>
   </div>
@@ -188,33 +193,37 @@ const Carrito = ({ carrito, setCarrito }) => {
           {mostrarFormulario && (
             <form className="mt-4">
               <h3>Datos del Pedido</h3>
+              <label htmlFor="nombre">Nombre</label>
               <input
                 type="text"
                 className="form-control mb-3 w-50"
                 name="nombre"
-                placeholder="Nombre"
+                placeholder='Ej. "Juan Perez"'
                 value={formularioDatos.nombre}
                 onChange={handleInputChange}
                 required
               />
+              <label htmlFor="telefono">Telefono</label>
               <input
                 type="text"
                 className="form-control mb-3 w-50"
                 name="telefono"
-                placeholder="Teléfono"
+                placeholder='Ej. "+56912345678"'
                 value={formularioDatos.telefono}
                 onChange={handleInputChange}
                 required
               />
+              <label htmlFor="direccion">Dirección</label>
               <input
                 type="text"
                 className="form-control mb-3 w-50"
                 name="direccion"
-                placeholder="Dirección"
+                placeholder='Ej. "Calle 123, Comuna"'
                 value={formularioDatos.direccion}
                 onChange={handleInputChange}
                 required
               />
+              <label htmlFor="fechaPedido">Fecha de entrega</label>
               <input
                 type="date"
                 className="form-control mb-3 w-50"
@@ -222,6 +231,7 @@ const Carrito = ({ carrito, setCarrito }) => {
                 value={formularioDatos.fechaPedido}
                 onChange={handleInputChange}
                 required
+                min={fechaMinima}
               />
               <button
                 type="button"
