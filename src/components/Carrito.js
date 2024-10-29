@@ -247,12 +247,12 @@ const Carrito = ({ carrito, setCarrito }) => {
           {mostrarDatosBancarios && (
             <div className="mt-4">
               <h5>Transfiera el total del pedido a la siguiente cuenta y luego presione en "Confirmar Pedido"</h5>
-              <p>Nombre: Antonia Stevens</p>
-              <p>Rut: 21.145.874-7</p>
-              <p>Banco: Banco de Chile</p>
-              <p>Tipo de cuenta: Cuenta Vista</p>
-              <p>Cuenta: 07-593-01228-10</p>
-              <p>Correo: antostevens3@gmail.com</p>
+              <p>Nombre: Alimento Alco Bío Bío</p>
+              <p>Rut: 77902291-9</p>
+              <p>Banco: Banco Santander</p>
+              <p>Tipo de cuenta: Cuenta Corriente</p>
+              <p>Cuenta: 94750490</p>
+              <p>Correo: alimentosalcobiobiomail.com</p>
               <b>Monto: ${formatearPrecio(total)}</b>
               <div style={{ margin: '10px 0' }}></div>
               <ActualizarStock
