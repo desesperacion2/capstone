@@ -1,20 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebase-config';
 import emailjs from 'emailjs-com';
 
-const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
-  
+export default function ActualizarStock({ carrito, formularioDatos, onCompraExitosa }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const confirmarPedido = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const notifiedProducts = new Set();
+
     try {
-      // Crear un objeto de pedido
       const pedido = {
         cliente: {
           nombre: formularioDatos.nombre,
           telefono: formularioDatos.telefono,
           direccion: formularioDatos.direccion,
         },
-        fechaPedido: new Date().toISOString().split('T')[0], // Obtiene la fecha en formato YYYY-MM-DD
+        fechaPedido: new Date().toISOString().split('T')[0],
         productos: carrito.map((producto) => ({
           cantidad: producto.cantidad,
           descripcion: producto.descripcion,
@@ -24,28 +29,18 @@ const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
         total: carrito.reduce((total, item) => total + item.precio * item.cantidad, 0),
       };
 
-      // Guardar datos del pedido en Firebase
       const pedidosRef = collection(db, 'Pedidos');
-      const docRef = await addDoc(pedidosRef, pedido); // Almacena el pedido y obtiene el ID
+      const docRef = await addDoc(pedidosRef, pedido);
 
-      // Actualizar el stock de cada producto
       for (const producto of carrito) {
         let formatoNombre = producto.formatoSeleccionado.replace(/\s/g, '');
 
         // Correcciones específicas para ciertos productos
         if (producto.id === 'TofuFirme') {
           formatoNombre = formatoNombre.replace(/500gramos/i, '500Gramos');
-        } else if (producto.id === 'PizzaJamon') {
+        } else if (['PizzaJamon', 'PizzaPepperoni'].includes(producto.id)) {
           formatoNombre = formatoNombre.replace(/23cmy290gramos/i, '23cm290g');
-        } else if (producto.id === 'PizzaPepperoni') {
-          formatoNombre = formatoNombre.replace(/23cmy290gramos/i, '23cm290g');
-        } else if (producto.id === 'PizzaVeggieAceitunas') {
-          formatoNombre = formatoNombre.replace(/23cmy300gramos/i, '23cm300g');
-        } else if (producto.id === 'PizzaVeggieProteinaSoyaAceitunas') {
-          formatoNombre = formatoNombre.replace(/23cmy300gramos/i, '23cm300g');
-        } else if (producto.id === 'PizzaVeggieProteinaSoyaTomates') {
-          formatoNombre = formatoNombre.replace(/23cmy300gramos/i, '23cm300g');
-        } else if (producto.id === 'PizzaVeggieVerduras') {
+        } else if (['PizzaVeggieAceitunas', 'PizzaVeggieProteinaSoyaAceitunas', 'PizzaVeggieProteinaSoyaTomates', 'PizzaVeggieVerduras'].includes(producto.id)) {
           formatoNombre = formatoNombre.replace(/23cmy300gramos/i, '23cm300g');
         } else {
           formatoNombre = formatoNombre.replace(/unidades/i, 'Unidades');
@@ -62,56 +57,61 @@ const ActualizarStock = ({ carrito, formularioDatos, onCompraExitosa }) => {
 
         await updateDoc(formatoRef, { stock: nuevoStock });
 
-        if (nuevoStock === 0) {
-          enviarCorreoAgotado(producto.nombre);
-        } else if (nuevoStock <= 4) {
-          enviarCorreoBajoStock(producto.nombre, nuevoStock);
+        const productKey = `${producto.id}-${formatoNombre}`;
+
+        if (nuevoStock === 0 && !notifiedProducts.has(productKey)) {
+          await enviarCorreoAgotado(producto.nombre);
+          notifiedProducts.add(productKey);
+        } else if (nuevoStock <= 4 && !notifiedProducts.has(productKey)) {
+          await enviarCorreoBajoStock(producto.nombre, nuevoStock);
+          notifiedProducts.add(productKey);
         }
       }
 
-      onCompraExitosa(docRef.id); // Pasar el ID del pedido exitoso
+      onCompraExitosa(docRef.id);
     } catch (error) {
       console.error('Error al confirmar el pedido:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const enviarCorreoBajoStock = (nombreProducto, stock) => {
+  const enviarCorreoBajoStock = async (nombreProducto, stock) => {
     const templateParams = {
       to_email: 'emilioestebansuazo@gmail.com',
       product_name: nombreProducto,
       stock_quantity: stock,
     };
 
-    emailjs.send('service_wfl68aj', 'template_nxgfcmt', templateParams, '3Fz3DdCNxBCbRv-Ga')
-      .then((response) => {
-        console.log('Correo de bajo stock enviado con éxito:', response.status, response.text);
-      }, (error) => {
-        console.error('Error al enviar el correo de bajo stock:', error);
-      });
+    try {
+      const response = await emailjs.send('service_wfl68aj', 'template_nxgfcmt', templateParams, '3Fz3DdCNxBCbRv-Ga');
+      console.log('Correo de bajo stock enviado con éxito:', response.status, response.text);
+    } catch (error) {
+      console.error('Error al enviar el correo de bajo stock:', error);
+    }
   };
 
-  const enviarCorreoAgotado = (nombreProducto) => {
+  const enviarCorreoAgotado = async (nombreProducto) => {
     const templateParams = {
       to_email: 'emilioestebansuazo@gmail.com',
       product_name: nombreProducto,
     };
 
-    emailjs.send('service_wfl68aj', 'template_cj3dg8t', templateParams, '3Fz3DdCNxBCbRv-Ga')
-      .then((response) => {
-        console.log('Correo de producto agotado enviado con éxito:', response.status, response.text);
-      }, (error) => {
-        console.error('Error al enviar el correo de producto agotado:', error);
-      });
+    try {
+      const response = await emailjs.send('service_wfl68aj', 'template_cj3dg8t', templateParams, '3Fz3DdCNxBCbRv-Ga');
+      console.log('Correo de producto agotado enviado con éxito:', response.status, response.text);
+    } catch (error) {
+      console.error('Error al enviar el correo de producto agotado:', error);
+    }
   };
 
   return (
     <button
       className="btn btn-success"
       onClick={confirmarPedido}
+      disabled={isSubmitting}
     >
-      Confirmar Pedido
+      {isSubmitting ? 'Procesando...' : 'Confirmar Pedido'}
     </button>
   );
-};
-
-export default ActualizarStock;
+}

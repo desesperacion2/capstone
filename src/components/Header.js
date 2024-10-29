@@ -75,7 +75,7 @@ const Header = ({ setBusqueda }) => {
           <input
             className="form-control me-2"
             type="search"
-            placeholder="Buscar productos y marcas"
+            placeholder="Buscar productos"
             aria-label="Search"
             style={{ width: '100%' }}
             value={searchTerm}
