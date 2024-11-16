@@ -2,14 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { db } from '../firebase-config';
+import ReactGA from "react-ga4";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Productos = ({ carrito, setCarrito, busqueda }) => {
   const [productos, setProductos] = useState([]);
   const [cantidad, setCantidad] = useState(1);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
-  const [productoAgregadoId, setProductoAgregadoId] = useState(null); // Estado para el ID del producto agregado
-  const [mensajeError, setMensajeError] = useState({}); // Estado para los mensajes de error específicos por producto
+  const [productoAgregadoId, setProductoAgregadoId] = useState(null);
+  const [mensajeError, setMensajeError] = useState({});
 
   const fetchProductos = async () => {
     try {
@@ -74,7 +75,7 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
   };
 
   const agregarAlCarrito = (producto) => {
-    setMensajeError((prev) => ({ ...prev, [producto.id]: null })); // Restablecer el mensaje de error para el producto específico
+    setMensajeError((prev) => ({ ...prev, [producto.id]: null }));
 
     if (productoSeleccionado) {
       const productoEnCarrito = carrito.find(
@@ -95,19 +96,25 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
           );
           setCarrito(nuevoCarrito);
           localStorage.setItem('carrito', JSON.stringify(nuevoCarrito));
-          setProductoAgregadoId(productoSeleccionado.id); // Establece el ID del producto agregado
+          setProductoAgregadoId(productoSeleccionado.id);
 
-          // Ocultar el mensaje después de 2 segundos
+          // Rastrear producto añadido al carrito
+          ReactGA.event({
+            category: "Ecommerce",
+            action: "Add to Cart",
+            label: productoSeleccionado.nombre,
+            value: nuevaCantidad
+          });
+
           setTimeout(() => {
             setProductoAgregadoId(null);
           }, 2000);
         } else {
           const errorMsg = "No hay suficiente stock disponible";
-          setMensajeError((prev) => ({ ...prev, [producto.id]: errorMsg })); // Mensaje de error específico para este producto
+          setMensajeError((prev) => ({ ...prev, [producto.id]: errorMsg }));
           
-          // Ocultar el mensaje de error después de 2 segundos
           setTimeout(() => {
-            setMensajeError((prev) => ({ ...prev, [producto.id]: null })); // Restablecer el mensaje de error después de 2 segundos
+            setMensajeError((prev) => ({ ...prev, [producto.id]: null }));
           }, 2000);
         }
       } else {
@@ -115,19 +122,25 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
           const nuevoCarrito = [...carrito, { ...productoSeleccionado, cantidad }];
           setCarrito(nuevoCarrito);
           localStorage.setItem('carrito', JSON.stringify(nuevoCarrito));
-          setProductoAgregadoId(productoSeleccionado.id); // Establece el ID del producto agregado
+          setProductoAgregadoId(productoSeleccionado.id);
 
-          // Ocultar el mensaje después de 2 segundos
+          // Rastrear producto añadido al carrito
+          ReactGA.event({
+            category: "Ecommerce",
+            action: "Add to Cart",
+            label: productoSeleccionado.nombre,
+            value: cantidad
+          });
+
           setTimeout(() => {
             setProductoAgregadoId(null);
           }, 2000);
         } else {
           const errorMsg = "No hay suficiente stock disponible";
-          setMensajeError((prev) => ({ ...prev, [producto.id]: errorMsg })); // Mensaje de error específico para este producto
+          setMensajeError((prev) => ({ ...prev, [producto.id]: errorMsg }));
           
-          // Ocultar el mensaje de error después de 2 segundos
           setTimeout(() => {
-            setMensajeError((prev) => ({ ...prev, [producto.id]: null })); // Restablecer el mensaje de error después de 2 segundos
+            setMensajeError((prev) => ({ ...prev, [producto.id]: null }));
           }, 2000);
         }
       }

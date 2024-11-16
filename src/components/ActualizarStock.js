@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebase-config';
 import emailjs from 'emailjs-com';
+import ReactGA from "react-ga4";
 
 export default function ActualizarStock({ carrito, formularioDatos, onCompraExitosa }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,6 +32,23 @@ export default function ActualizarStock({ carrito, formularioDatos, onCompraExit
 
       const pedidosRef = collection(db, 'Pedidos');
       const docRef = await addDoc(pedidosRef, pedido);
+
+      // Rastrear la compra completada
+      ReactGA.event({
+        category: "Ecommerce",
+        action: "Purchase",
+        value: pedido.total
+      });
+
+      // Rastrear los productos comprados
+      carrito.forEach((producto) => {
+        ReactGA.event({
+          category: "Ecommerce",
+          action: "Product Purchased",
+          label: producto.nombre,
+          value: producto.cantidad
+        });
+      });
 
       for (const producto of carrito) {
         let formatoNombre = producto.formatoSeleccionado.replace(/\s/g, '');
