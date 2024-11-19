@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import React, { useEffect, useState, useRef } from 'react';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { db } from '../firebase-config';
 import ReactGA from "react-ga4";
+import { useSearchParams } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Productos = ({ carrito, setCarrito, busqueda }) => {
@@ -11,10 +12,19 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [productoAgregadoId, setProductoAgregadoId] = useState(null);
   const [mensajeError, setMensajeError] = useState({});
+  const [searchParams] = useSearchParams();
+  const categoriaSeleccionada = searchParams.get('categoria');
+  const highlightedProductId = searchParams.get('highlight');
+  const productRefs = useRef({});
 
   const fetchProductos = async () => {
     try {
-      const productosRef = collection(db, 'Productos');
+      let productosRef = collection(db, 'Productos');
+      
+      if (categoriaSeleccionada) {
+        productosRef = query(productosRef, where("categoria", "==", categoriaSeleccionada));
+      }
+      
       const snapshot = await getDocs(productosRef);
 
       const productosData = await Promise.all(
@@ -50,6 +60,20 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
       );
 
       setProductos(productosData);
+
+      // Scroll to highlighted product after products are loaded
+      if (highlightedProductId) {
+        setTimeout(() => {
+          const productElement = productRefs.current[highlightedProductId];
+          if (productElement) {
+            productElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            productElement.classList.add('highlighted');
+            setTimeout(() => {
+              productElement.classList.remove('highlighted');
+            }, 3000);
+          }
+        }, 100);
+      }
     } catch (error) {
       console.error('Error al obtener los productos:', error);
     }
@@ -98,7 +122,6 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
           localStorage.setItem('carrito', JSON.stringify(nuevoCarrito));
           setProductoAgregadoId(productoSeleccionado.id);
 
-          // Rastrear producto añadido al carrito
           ReactGA.event({
             category: "Ecommerce",
             action: "Add to Cart",
@@ -124,7 +147,6 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
           localStorage.setItem('carrito', JSON.stringify(nuevoCarrito));
           setProductoAgregadoId(productoSeleccionado.id);
 
-          // Rastrear producto añadido al carrito
           ReactGA.event({
             category: "Ecommerce",
             action: "Add to Cart",
@@ -166,7 +188,7 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
 
   useEffect(() => {
     fetchProductos();
-  }, []);
+  }, [categoriaSeleccionada]);
 
   const productosFiltrados = productos.filter(producto =>
     producto.nombre.toLowerCase().includes(busqueda.toLowerCase())
@@ -174,24 +196,30 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
 
   return (
     <div className="container mt-5">
-      <h1 className="text-center mb-4">Productos Disponibles</h1>
-      <div className="row">
+      <h1 className="text-center mb-4">
+        {categoriaSeleccionada ? `Productos - ${categoriaSeleccionada}` : 'Todos los Productos'}
+      </h1>
+      <div className="row g-4">
         {productosFiltrados.length > 0 ? (
           productosFiltrados.map((producto) => (
-            <div key={producto.id} className="col-md-4 mb-4">
+            <div 
+              key={producto.id} 
+              className="col-md-3"
+              ref={el => productRefs.current[producto.id] = el}
+            >
               <div className="card h-100">
                 <img
                   src={producto.imagenUrl}
                   alt={producto.nombre}
                   className="card-img-top"
-                  style={{ maxHeight: '200px', objectFit: 'contain' }}
+                  style={{ height: '200px', objectFit: 'contain' }}
                 />
-                <div className="card-body text-center">
+                <div className="card-body d-flex flex-column">
                   <h5 className="card-title">{producto.nombre}</h5>
-                  <p className="card-text">{producto.descripcion}</p>
+                  <p className="card-text text-muted">{producto.descripcion}</p>
                   <div className="dropdown mb-3">
                     <button
-                      className="btn btn-secondary dropdown-toggle"
+                      className="btn btn-outline-secondary dropdown-toggle"
                       type="button"
                       id={`dropdown-${producto.id}`}
                       data-bs-toggle="dropdown"
@@ -216,12 +244,8 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
                       )}
                     </ul>
                   </div>
-                  <p className="card-text">
-                    <strong>Precio:</strong> ${producto.precio}
-                  </p>
-                  <p className="card-text">
-                    <strong>Stock disponible:</strong> {producto.stock}
-                  </p>
+                  <p className="card-text"><strong>Precio: ${producto.precio}</strong></p>
+                  <p className="card-text text-success">{producto.stock > 0 ? `En stock (${producto.stock} unidades)` : 'Agotado'}</p>
 
                   {productoSeleccionado?.id === producto.id ? (
                     <div className="mb-3">
@@ -237,9 +261,9 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
                     </div>
                   ) : null}
 
-                  <div>
+                  <div className="mt-auto">
                     <button
-                      className="btn btn-primary"
+                      className="btn btn-primary w-100"
                       onClick={() => agregarAlCarrito(producto)}
                     >
                       {productoSeleccionado?.id === producto.id ? 'Confirmar cantidad' : 'Agregar al carrito'}
@@ -247,7 +271,7 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
 
                     {productoSeleccionado?.id === producto.id && (
                       <button
-                        className="btn btn-secondary ms-2"
+                        className="btn btn-secondary w-100 mt-2"
                         onClick={cancelarSeleccion}
                       >
                         Cancelar
@@ -255,16 +279,14 @@ const Productos = ({ carrito, setCarrito, busqueda }) => {
                     )}
                   </div>
 
-                  {/* Mensaje de éxito */}
                   {productoAgregadoId === producto.id && (
-                    <div style={{ color: 'green', marginTop: '10px' }}>
+                    <div className="text-success mt-2">
                       Se ha agregado al carrito
                     </div>
                   )}
 
-                  {/* Mensaje de error específico */}
                   {mensajeError[producto.id] && (
-                    <div style={{ color: 'red', marginTop: '10px' }}>
+                    <div className="text-danger mt-2">
                       {mensajeError[producto.id]}
                     </div>
                   )}
