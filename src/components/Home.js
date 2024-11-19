@@ -155,7 +155,7 @@ const Home = () => {
             </div>
           </div>
           <div className="col-md-3">
-            <div className="card h-100" onClick={() => handleCategoryClick('Gyozas')}>
+            <div className="card h-100" onClick={() => handleCategoryClick('Gyosas')}>
               <img 
                 src="https://firebasestorage.googleapis.com/v0/b/alcobiobio-99968.appspot.com/o/gyoza%20home.jpg?alt=media&token=c2eef125-5be5-4be8-a9ff-53a1dd8cfc15" 
                 className="card-img-top" 
