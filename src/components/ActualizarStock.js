@@ -96,7 +96,7 @@ export default function ActualizarStock({ carrito, formularioDatos, onCompraExit
 
   const enviarCorreoBajoStock = async (nombreProducto, stock) => {
     const templateParams = {
-      to_email: 'alimentosalcobiobiomail@gmail.com',
+      to_email: 'alimentosalcobiobio@gmail.com',
       product_name: nombreProducto,
       stock_quantity: stock,
     };
@@ -111,7 +111,7 @@ export default function ActualizarStock({ carrito, formularioDatos, onCompraExit
 
   const enviarCorreoAgotado = async (nombreProducto) => {
     const templateParams = {
-      to_email: 'alimentosalcobiobiomail@gmail.com',
+      to_email: 'alimentosalcobiobio@gmail.com',
       product_name: nombreProducto,
     };
 

@@ -252,7 +252,7 @@ const Carrito = ({ carrito, setCarrito }) => {
               <p>Banco: Banco Santander</p>
               <p>Tipo de cuenta: Cuenta Corriente</p>
               <p>Cuenta: 94750490</p>
-              <p>Correo: alimentosalcobiobiomail@gmail.com</p>
+              <p>Correo: alimentosalcobiobio@gmail.com</p>
               <b>Monto: ${formatearPrecio(total)}</b>
               <div style={{ margin: '10px 0' }}></div>
               <ActualizarStock
