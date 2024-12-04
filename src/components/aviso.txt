@@ -1,2 +1,0 @@
-los componentes searchbar y logo.js se juntaron en uno header.js. no quise borrar los otros por si pasaba algo
-el componente de StockAlert al final no sirvio de nada pero lo dejo por si hay que usarlo denuevo

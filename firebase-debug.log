@@ -1,0 +1,36 @@
+[debug] [2024-12-04T04:13:08.369Z] ----------------------------------------------------------------------
+[debug] [2024-12-04T04:13:08.371Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\emili\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2024-12-04T04:13:08.372Z] CLI Version:   13.27.0
+[debug] [2024-12-04T04:13:08.372Z] Platform:      win32
+[debug] [2024-12-04T04:13:08.372Z] Node Version:  v18.18.0
+[debug] [2024-12-04T04:13:08.374Z] Time:          Wed Dec 04 2024 01:13:08 GMT-0300 (hora de verano de Chile)
+[debug] [2024-12-04T04:13:08.374Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-12-04T04:13:08.470Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-12-04T04:13:08.471Z] > authorizing via signed-in user (emilioestebansuazo@gmail.com)
+[debug] [2024-12-04T04:13:08.471Z] [iam] checking project alcobiobio-99968 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2024-12-04T04:13:08.473Z] Checked if tokens are valid: false, expires at: 1733268085297
+[debug] [2024-12-04T04:13:08.473Z] Checked if tokens are valid: false, expires at: 1733268085297
+[debug] [2024-12-04T04:13:08.474Z] > refreshing access token with scopes: []
+[debug] [2024-12-04T04:13:08.476Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2024-12-04T04:13:08.476Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-12-04T04:13:08.604Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2024-12-04T04:13:08.604Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-12-04T04:13:08.616Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/alcobiobio-99968:testIamPermissions [none]
+[debug] [2024-12-04T04:13:08.617Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/alcobiobio-99968:testIamPermissions x-goog-quota-user=projects/alcobiobio-99968
+[debug] [2024-12-04T04:13:08.617Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/alcobiobio-99968:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2024-12-04T04:13:09.476Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/alcobiobio-99968:testIamPermissions 200
+[debug] [2024-12-04T04:13:09.476Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/alcobiobio-99968:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2024-12-04T04:13:09.476Z] Checked if tokens are valid: true, expires at: 1733289187604
+[debug] [2024-12-04T04:13:09.477Z] Checked if tokens are valid: true, expires at: 1733289187604
+[debug] [2024-12-04T04:13:09.478Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/alcobiobio-99968 [none]
+[debug] [2024-12-04T04:13:09.781Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/alcobiobio-99968 200
+[debug] [2024-12-04T04:13:09.781Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/alcobiobio-99968 {"projectId":"alcobiobio-99968","projectNumber":"1089350368735","displayName":"alcobiobio","name":"projects/alcobiobio-99968","resources":{"hostingSite":"alcobiobio-99968","storageBucket":"alcobiobio-99968.appspot.com","locationId":"us-central"},"state":"ACTIVE","etag":"1_a969724e-49a3-4ca9-a59a-ef94a204ef80"}
+[info] 
+[info] === Deploying to 'alcobiobio-99968'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2024-12-04T04:13:09.790Z] Checked if tokens are valid: true, expires at: 1733289187604
+[debug] [2024-12-04T04:13:09.790Z] Checked if tokens are valid: true, expires at: 1733289187604
+[debug] [2024-12-04T04:13:09.790Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/alcobiobio-99968/versions [none]
+[debug] [2024-12-04T04:13:09.791Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/alcobiobio-99968/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}

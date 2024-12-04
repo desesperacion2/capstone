@@ -115,10 +115,10 @@ const Carrito = ({ carrito, setCarrito }) => {
     <p>Por favor, envíe su comprobante de pago vía WhatsApp, indicando el ID de la compra.</p>
     <p>
       <a 
-        href={`https://wa.me/56945768174?text=Hola mi nombre es ${formularioDatos.nombre}%0AQuiero confirmar mi pedido con el ID: ${compraId}`} // Asegúrate de cambiar el número a tu número real
+        href={`https://wa.me/+56974960446?text=Hola mi nombre es ${formularioDatos.nombre}%0AQuiero confirmar mi pedido con el ID: ${compraId}`} 
         target="_blank"
         rel="noopener noreferrer"
-        className="text-primary" // Puedes usar cualquier clase de estilo que prefieras
+        className="text-primary" 
       >
         Presione aqui para enviar su comprobante vía WhatsApp
       </a>

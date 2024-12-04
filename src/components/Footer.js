@@ -5,13 +5,13 @@ const Footer = () => {
   return (
     <footer
       className="bg-dark text-white text-center py-2"
-      style={{ fontSize: '14px', marginTop: '20px' }} // Aquí agregamos el margen superior
+      style={{ fontSize: '14px', marginTop: '20px' }} 
     >
       <div className="container d-flex justify-content-between align-items-center">
         <p className="mb-0">© 2024 Alcobiobio. Todos los derechos reservados.</p>
         <div className="d-flex align-items-center">
           <a
-            href="https://wa.me/56945768174"
+            href="https://wa.me/56974960446"
             className="text-white me-3"
             style={{ fontSize: '20px' }}
             aria-label="Contacto WhatsApp"
@@ -28,8 +28,8 @@ const Footer = () => {
           </a>
         </div>
         <p className="mb-0">
-          <a href="https://wa.me/56945768174" className="text-white" style={{ textDecoration: 'none' }}>
-            Contacto: +56 9 4576 8174
+          <a href="https://wa.me/56974960446" className="text-white" style={{ textDecoration: 'none' }}>
+            Contacto: +56 9 7496 0446
           </a>
         </p>
       </div>
